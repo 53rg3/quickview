@@ -6,10 +6,10 @@ const fileList = $('#file-list');
 const fileMap = new Map();
 const debugContainer = $('#debug');
 const errorIcon = "src/error.png";
-const errors = [];
+let errors = [];
 const fileScope = new Map(); // All files in focus. Only these will be used for search
 const debouncedSearch = debounce(() => search(), config.debounceDelay);
-
+const regexErrorMsg = "Failed to parse regex: ";
 
 function search() {
     let searchTerm = searchInput.val();
@@ -20,11 +20,12 @@ function search() {
 
     let matchingSections = [];
     let searchRegex;
+    removeRegexErrors();
     try {
         searchRegex = new RegExp(searchTerm, "ig");
     } catch (e) {
-        addError("Failed to parse regex: " + e);
-        throw new Error(e);
+        addError(regexErrorMsg + e);
+        throw new Error(regexErrorMsg + e)
     }
     fileScope.forEach(function (file) { // Loop through each file in focus
         $(file.sections).each(function (index, section) { // Loop through each section
@@ -35,6 +36,16 @@ function search() {
         });
     });
     renderSearchResults(matchingSections);
+}
+
+function removeRegexErrors() {
+    errors = $(errors).filter(function (index, msg) {
+        console.log(msg);
+        if (msg.indexOf(regexErrorMsg) !== -1) {
+            return false;
+        }
+    });
+    renderErrors();
 }
 
 function addHighlighting(section, searchRegex, match) {
@@ -66,7 +77,7 @@ function renderInitialFile(file) {
 }
 
 function extractSections(markdown) {
-    return markdown.split("---").map(function (section) {
+    return markdown.split(/\n---\n/).map(function (section) {
         return section.trim();
     });
 }
@@ -259,13 +270,13 @@ function selectAll() {
 
 function resetAll() {
     searchInput.val("");
-    deselectAll();
 }
 
 document.onkeyup = function (e) {
-    if (searchInput.is(":focus")) {
+    if (searchInput.is(":focus") && e.code !== "Escape") {
         return;
     }
+    e.preventDefault();
 
     switch (e.code) {
         case "Digit1":
@@ -283,53 +294,27 @@ document.onkeyup = function (e) {
             }
             break;
 
-        case "KeyA":
-        case "KeyB":
-        case "KeyC":
-        case "KeyD":
-        case "KeyE":
-        case "KeyF":
-        case "KeyG":
-        case "KeyH":
-        case "KeyI":
-        case "KeyJ":
-        case "KeyK":
-        case "KeyL":
-        case "KeyM":
-        case "KeyN":
-        case "KeyO":
-        case "KeyP":
-        case "KeyQ":
-        case "KeyR":
-        case "KeyS":
-        case "KeyT":
-        case "KeyU":
-        case "KeyV":
-        case "KeyW":
-        case "KeyX":
-        case "KeyY":
-        case "KeyZ":
-        case "Space":
-            searchInput.val(searchInput.val() + e.key);
-            search();
-            break;
-
-        case "Backspace":
-            searchInput.val(searchInput.val().substring(0, searchInput.val().length - 1)); // Remove last character
-            search();
-            break;
-
         case "Backquote":
             selectAllOrNone();
             break;
 
         case "Escape":
             resetAll();
+            search();
             break;
     }
-
-    return false;
 }
+
+$(document).on('keydown', function (e) {
+    if (e.which === 9) {
+        e.preventDefault();
+        if (!searchInput.is(":focus")) {
+            searchInput.focus();
+        } else {
+            searchInput.trigger("blur");
+        }
+    }
+});
 
 renderTitle();
 initialize();
