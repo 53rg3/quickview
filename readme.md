@@ -1,6 +1,7 @@
 # QuickView
 
-Quickview lets you search through multiple Markdown files in a fast way. This is useful when you have many
+Quickview lets you search through multiple Markdown files in a fast way, conveniently rendering them in the browser as HTML. 
+This is useful when you have many
 
 - Links
 - Code snippets
