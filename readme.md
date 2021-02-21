@@ -36,7 +36,7 @@ your search term.
 
 ## Shortcuts
 
-You can navigate the application with the mouse!
+You can navigate the application without the mouse!
 
 - **Number keys (1,2,3...)**
   
