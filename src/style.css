@@ -1,5 +1,6 @@
 body {
     font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;
+    overflow-y: scroll;
 }
 
 .wrapper {

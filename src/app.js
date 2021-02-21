@@ -1,4 +1,4 @@
-const converter = new showdown.Converter(showDownJsOptions)
+const converter = new showdown.Converter(config.showDownJsOptions)
 const resultSetContainer = $('#result-set-container');
 const resultSize = $('#result-size');
 const searchInput = $('#search-input');
@@ -8,7 +8,7 @@ const debugContainer = $('#debug');
 const errorIcon = "src/error.png";
 const errors = [];
 const fileScope = new Map(); // All files in focus. Only these will be used for search
-const debouncedSearch = debounce(() => search(), debounceDelay);
+const debouncedSearch = debounce(() => search(), config.debounceDelay);
 
 
 function search() {
@@ -83,12 +83,12 @@ function renderSearchResults(sections) {
 
     let sectionsToOmit = 0;
     let omissions = "";
-    if (sections.length > maxSectionsToShow) {
-        sectionsToOmit = sections.length - maxSectionsToShow;
+    if (sections.length > config.maxSectionsToShow) {
+        sectionsToOmit = sections.length - config.maxSectionsToShow;
         omissions = "<div>" +
-            "Skipped sections: " + sectionsToOmit + " (max is set to " + maxSectionsToShow + ", see config.js)" +
+            "Skipped sections: " + sectionsToOmit + " (max is set to " + config.maxSectionsToShow + ", see config.js)" +
             "</div>";
-        sections = sections.splice(0, maxSectionsToShow);
+        sections = sections.splice(0, config.maxSectionsToShow);
     }
 
     resultSetContainer.html(
@@ -140,14 +140,14 @@ function setFocus(fileKey, element) {
 }
 
 function initialize() {
-    if (files.length === 0) {
+    if (config.files.length === 0) {
         let msg = "No files defined in config.js";
         addError(msg);
         throw new Error(msg);
     }
 
     let html = "";
-    $(files).each(function (index, file) {
+    $(config.files).each(function (index, file) {
         index === 0 ? file.isFirst = true : file.isFirst = false;
 
         let hash = toHash(file.path);
@@ -170,7 +170,7 @@ function createButtonHtml(file, index, hash) {
 }
 
 function renderTitle() {
-    $('#title').text(title);
+    $('#title').text(config.title);
 }
 
 function addError(message) {
@@ -278,7 +278,9 @@ document.onkeyup = function (e) {
         case "Digit8":
         case "Digit9":
         case "Digit0":
-            setFocusByShortcut(e.key)
+            if (fileMap.size >= e.key) {
+                setFocusByShortcut(e.key);
+            }
             break;
 
         case "KeyA":
@@ -325,6 +327,8 @@ document.onkeyup = function (e) {
             resetAll();
             break;
     }
+
+    return false;
 }
 
 renderTitle();
