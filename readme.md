@@ -1,4 +1,4 @@
-# Help
+# QuickView
 
 Quickview lets you search through multiple Markdown files in a fast way. This is useful when you have many
 
